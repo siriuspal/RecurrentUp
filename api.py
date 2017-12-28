@@ -1,88 +1,104 @@
+""" Class for talking to ClickUp API """
+
 import requests
-import json
-
-API_TOKEN = 'MYTOKEN'
 
 
-def get_team(token):
-    headers = {
-        "Authorization": token
+class ClickUp:
+    """ Clickup API wrapper required for the project """
+
+    def __init__(self, token):
+
+        self.token = token
+
+    def get_team(self):
+        """ Get team and team member details for which token is provided """
+
+        headers = {
+            "Authorization": self.token
+            }
+
+        response = requests.get('https://api.clickup.com/api/v1/team', headers=headers)
+
+        response_json = response.json()
+
+        return response_json
+
+
+    def get_space(self, team):
+        """ Get information on Space for given team """
+
+        headers = {
+            "Authorization": self.token
+            }
+
+        response = requests.get('https://api.clickup.com/api/v1/team/%s/space' %team,
+                                headers=headers)
+
+        response_json = response.json()
+
+        return response_json
+
+
+    def get_proj(self, space):
+        """ Get information on project including lists for a given space """
+        headers = {
+            "Authorization": self.token
+            }
+
+        response = requests.get('https://api.clickup.com/api/v1/space/%s/project' %space,
+                                headers=headers)
+
+        response_json = response.json()
+
+        return response_json
+
+
+    def create_list(self, name, proj):
+        """ Create a Task with given name in a given project """
+        values = {
+            "name": name
         }
 
-    response = requests.get('https://api.clickup.com/api/v1/team', headers=headers)
-
-    response_json = response.json()
-
-    return response_json
-
-
-def get_space(token):
-    headers = {
-        "Authorization": token
+        headers = {
+            "Authorization": self.token
         }
 
-    response = requests.get('https://api.clickup.com/api/v1/team/602544/space', headers=headers)
+        response = requests.post('https://api.clickup.com/api/v1/project/%s/list' %proj,
+                                 data=values, headers=headers)
 
-    response_json = response.json()
+        response_json = response.json()
 
-    return response_json
+        return response_json
 
 
-def get_proj(token):
-    headers = {
-        "Authorization": token
+    def create_task(self, lis):
+        """ Create a task in a given list """
+        values = {
+            "name": "NewTaskName",
+            "content": "New Task Content",
+            "assignees": [65080],
+            "status": "Open",
+            "priority": 3,
+            "due_date": "1508369194377"
         }
 
-    response = requests.get('https://api.clickup.com/api/v1/space/603365/project', headers=headers)
+        headers = {
+            "Authorization": self.token,
+            "Content-Type": "application/json"
+        }
 
-    response_json = response.json()
+        response = requests.post('https://api.clickup.com/api/v1/list/%s/task' %lis,
+                                 data=values, headers=headers)
 
-    return response_json
+        response_json = response.text
 
-
-def create_list(token):
-    values = {
-        "name": "New List 3"
-    }
-
-    headers = {
-        "Authorization": token
-    }
-
-    response = requests.post('https://api.clickup.com/api/v1/project/606540/list',
-                             data=values, headers=headers)
-
-    response_json = response.json()
-
-    return response_json
+        return response_json
 
 
-def create_task(token):
-    values = {
-        "name": "New Task Name",
-        "content": "New Task Content",
-        "assignees": [65080],
-        "status": "Open",
-        "priority": 3,
-        "due_date": "1508369194377"
-    }
+cu = ClickUp('token')
 
-    headers = {
-        "Authorization": token,
-        "Content-Type": 'application/json'
-    }
-
-    response = requests.post('https://api.clickup.com/api/v1/list/614774/task',
-                             data=values, headers=headers)
-
-    response_json = response.text
-
-    return response_json
-
-"""
-print(get_team(API_TOKEN))
-print(get_space(API_TOKEN))
-print(get_proj(API_TOKEN))
-print(create_list(API_TOKEN))
-"""
-print(create_task(API_TOKEN))
+#print(cu.get_team())
+#print(cu.get_space(602544))
+#print(cu.get_proj(603365))
+#print(cu.create_list('Trial Task 1', 606540))
+print(cu.create_task(614774))
