@@ -1,7 +1,13 @@
 """ Class for talking to ClickUp API """
 
+import time
 import requests
 
+
+# Epoch for tomorrow as a default due date
+tom = time.time() + 86400
+tom = str(tom)
+tom = tom[:10] + tom[11:14]
 
 class ClickUp:
     """ Clickup API wrapper required for the project """
@@ -9,6 +15,7 @@ class ClickUp:
     def __init__(self, token):
 
         self.token = token
+
 
     def get_team(self):
         """ Get team and team member details for which token is provided """
@@ -24,6 +31,7 @@ class ClickUp:
 
         return response_json
 
+
     def get_space(self, team):
         """ Get information on Space for given team """
 
@@ -38,6 +46,7 @@ class ClickUp:
 
         return response_json
 
+
     def get_proj(self, space):
         """ Get information on project including lists for a given space """
         headers = {
@@ -50,6 +59,7 @@ class ClickUp:
         response_json = response.json()
 
         return response_json
+
 
     def create_list(self, name, proj):
         """ Create a Task with given name in a given project """
@@ -68,15 +78,17 @@ class ClickUp:
 
         return response_json
 
-    def create_task(self, lis):
-        """ Create a task in a given list """
+
+    def create_task(self, lis, name, cont="", assign=[65080], stat="Open", prt=3, due=tom):
+        """ Create a task in a given list. Priority: 1:4 Urgent-High-Normal-Low """
+
         values = {
-            "name": "New Task Name 3",
-            #"content": "New Task Content",
-            "assignees": [65080],
-            "status": "Open",
-            "priority": 3,
-            "due_date": "1546108200000"
+            "name": name,
+            "content": cont,
+            "assignees": assign,
+            "status": stat,
+            "priority": prt, # 1: Urgent 2: High 3: Normal 4: Low
+            "due_date": due #Posix millisecond
         }
 
         headers = {
@@ -92,10 +104,8 @@ class ClickUp:
         return response_json
 
 
-cu = ClickUp('token')
-
 # print(cu.get_team())
 # print(cu.get_space(602544))
 # print(cu.get_proj(603365))
 #print(cu.create_list('Trial Task 1', 606540))
-print(cu.create_task(614774))
+#print(cu.create_task(614774, 'newtrialtask3'))
